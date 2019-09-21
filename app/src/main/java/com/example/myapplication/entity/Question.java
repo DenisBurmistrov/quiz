@@ -6,6 +6,8 @@ public class Question {
 
     private boolean isAnswerTrue;
 
+    private boolean isCheated;
+
     public Question(int textResId, boolean answerTrue) {
         this.textResId = textResId;
         this.isAnswerTrue = answerTrue;
@@ -25,5 +27,13 @@ public class Question {
 
     public void setAnswerTrue(boolean answerTrue) {
         isAnswerTrue = answerTrue;
+    }
+
+    public boolean isCheated() {
+        return isCheated;
+    }
+
+    public void setCheated(boolean cheated) {
+        isCheated = cheated;
     }
 }

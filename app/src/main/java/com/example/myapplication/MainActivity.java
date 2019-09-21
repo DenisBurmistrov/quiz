@@ -3,6 +3,7 @@ package com.example.myapplication;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView questionText;
     private Button cheatButton;
 
-    private Question[] questions = new Question[] {
+    private Question[] questions = new Question[]{
             new Question(R.string.question_australia, true),
             new Question(R.string.question_oceans, true),
             new Question(R.string.question_mideast, false),
@@ -73,13 +74,10 @@ public class MainActivity extends AppCompatActivity {
             updateQuestion(true);
         });
 
-        cheatButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                boolean answerIsTrue = questions[index].isAnswerTrue();
-                Intent intent = CheatActivity.newIntent(MainActivity.this, answerIsTrue);
-                startActivityForResult(intent, REQUEST_CODE_CHEAT);
-            }
+        cheatButton.setOnClickListener(view -> {
+            boolean answerIsTrue = questions[index].isAnswerTrue();
+            Intent intent = CheatActivity.newIntent(MainActivity.this, answerIsTrue);
+            startActivityForResult(intent, REQUEST_CODE_CHEAT);
         });
     }
 
@@ -139,16 +137,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkAnswer(boolean userPressedTrue) {
-        if ("".contentEquals(questionText.getText())) {
-            updateQuestion(true);
-            return;
-        }
-        boolean answerIsTrue = questions[index].isAnswerTrue();
         int messageResId;
-        if (userPressedTrue == answerIsTrue) {
-            messageResId = R.string.correct_toast;
+        if (questions[index].isCheated()) {
+            messageResId = R.string.judgment_toast;
         } else {
-            messageResId = R.string.incorrect_toast;
+
+            if ("".contentEquals(questionText.getText())) {
+                updateQuestion(true);
+                return;
+            }
+            boolean answerIsTrue = questions[index].isAnswerTrue();
+
+            if (userPressedTrue == answerIsTrue) {
+                messageResId = R.string.correct_toast;
+            } else {
+                messageResId = R.string.incorrect_toast;
+            }
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
                 .show();
@@ -170,5 +174,13 @@ public class MainActivity extends AppCompatActivity {
     private void hideButtons() {
         trueButton.setVisibility(View.GONE);
         falseButton.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (data != null) {
+            questions[index].setCheated(CheatActivity.wasAnswerShown(data));
+        }
     }
 }

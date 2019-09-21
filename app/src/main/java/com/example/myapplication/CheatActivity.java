@@ -3,26 +3,24 @@ package com.example.myapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.w3c.dom.Text;
-
 public class CheatActivity extends AppCompatActivity {
 
     private static final String EXTRA_ANSWER_IS_TRUE =
             "com.bignerdranch.android.geoquiz.answer_is_true";
 
-    private static final String EXTRA_ANSWER_SHOWN =
+    public static final String EXTRA_ANSWER_SHOWN =
             "com.bignerdranch.android.geoquiz.answer_shown";
 
     private boolean answerIsTrue;
     private TextView answer;
     private Button showAnswer;
+    private boolean isCheater;
 
 
     public static Intent newIntent(Context packageContext, boolean answerIsTrue) {
@@ -31,9 +29,16 @@ public class CheatActivity extends AppCompatActivity {
         return intent;
     }
 
+    public static boolean wasAnswerShown(Intent result) {
+        return result.getBooleanExtra(EXTRA_ANSWER_SHOWN, false);
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            isCheater = savedInstanceState.getBoolean(EXTRA_ANSWER_SHOWN);
+        }
         setContentView(R.layout.cheat_activity);
         answerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
         answer = findViewById(R.id.answer_text_view);
@@ -44,7 +49,8 @@ public class CheatActivity extends AppCompatActivity {
             } else {
                 answer.setText(R.string.false_button);
             }
-            setAnswerShownResult(true);
+            isCheater = true;
+            setAnswerShownResult(isCheater);
         });
     }
 
@@ -56,7 +62,13 @@ public class CheatActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        setAnswerShownResult(false);
+        setAnswerShownResult(isCheater);
+        finish();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(EXTRA_ANSWER_SHOWN, isCheater);
     }
 }
